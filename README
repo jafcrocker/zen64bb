@@ -1,0 +1,25 @@
+This project allows a user to create a Centos VM for pre-Europa Zenoss
+source-build development.  The intended usage is to check out source code on
+the host, perform a source build on the guest, mount the host's source on the
+guest, and link to the mounted source.  Then code can be edited on the host
+and changes will be reflected on the guest.
+
+Checkout on the host:
+# The Vagrantfile automatically mounts ./src as /home/vagrant/work
+$ cd ./src
+$ svn checkout http://dev.zenoss.com/svnint/branches/core/zenoss-4.x/ core
+
+Build on the guest:
+$ vagrant ssh
+$ sudo su - zenoss
+$ mkdir build; cd build
+$ svn co http://dev.zenoss.com/svnint/branches/core/zenoss-4.x/inst
+Then perform normal configure, build, mkzenossinstance steps
+
+Mount the src folder:
+We want to mount ./src as /home/zenoss/work with the owner set to "zenoss".
+However, the user zenoss does not exist until after the provisioning has
+completed.  So, I hack around it by doing the initial "vagrant up" with the
+synced_folder line for ./src commented out.  After the provisioning has
+completed, uncomment the synced_folder line and run "vagrant reload" to
+reload the VM with the synced folder.
