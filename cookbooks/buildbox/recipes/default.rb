@@ -80,11 +80,10 @@ service "mysql" do
 end
 
 # RRD
-$rrd_rpms = %w[ rrdtool-1.4.7-1.el6.rfx.x86_64.rpm
-                perl-rrdtool-1.4.7-1.el6.rfx.x86_64.rpm
-                rrdtool-devel-1.4.7-1.el6.rfx.x86_64.rpm
-                perl-Time-HiRes-1.9724-1.el6.rfx.x86_64.rpm ]
-$rrd_rpms.each do |rpm|
+%w[ rrdtool-1.4.7-1.el6.rfx.x86_64.rpm
+    perl-rrdtool-1.4.7-1.el6.rfx.x86_64.rpm
+    rrdtool-devel-1.4.7-1.el6.rfx.x86_64.rpm
+    perl-Time-HiRes-1.9724-1.el6.rfx.x86_64.rpm ].each do |rpm|
     remote_file rpm do
         action :create_if_missing
         source "#{$zen_download}/#{rpm}"
