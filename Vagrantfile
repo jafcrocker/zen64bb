@@ -4,6 +4,7 @@
 Vagrant.configure("2") do |config|
   config.vm.box = "zen64bb"
   config.vm.box_url = "http://developer.nrel.gov/downloads/vagrant-boxes/CentOS-6.4-x86_64-v20130427.box"
+  config.vm.synced_folder "./src", "/home/zenoss/work", owner: "zenoss", group: "zenoss"
   # config.vm.hostname = "YOURNAME.zenoss.loc"
 
   config.vm.provider :virtualbox do |vb|
@@ -16,8 +17,6 @@ Vagrant.configure("2") do |config|
     chef.cookbooks_path = "cookbooks"
     chef.add_recipe "buildbox"
   end
+
 end
 
-#sudo su - zenoss
-#svn co http://dev.zenoss.com/svnint/branches/core/zenoss-4.x/inst
-#./configure --with-rrdtool=yes --prefix=/opt/zenoss

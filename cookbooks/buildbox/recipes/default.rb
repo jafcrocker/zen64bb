@@ -1,20 +1,31 @@
-$zen_download="https://s3.amazonaws.com/wkh-zen-rpms"
+$zen_download="https://s3.amazonaws.com/wkh-zen-rpms" # Ward K. Harold
 $tmp_dir="#{Chef::Config[:file_cache_path]}"
 
 
 # RPMForge
-remote_file "#{$tmp_dir}/RPM-GPG-KEY.dag.txt" do
-    source  "http://apt.sw.be/RPM-GPG-KEY.dag.txt"
+$rpmforge_key="RPM-GPG-KEY.dag.txt"
+remote_file "#{$tmp_dir}/#{$rpmforge_key}" do
+    source  "http://apt.sw.be/#{$rpmforge_key}"
     action  :create_if_missing
 end
-execute "import RPM-GPG-KEY.dag.txt" do
-    command "rpm --import #{$tmp_dir}/RPM-GPG-KEY.dag.txt"
+execute "import #{$rpmforge_key}" do
+    command "rpm --import #{$tmp_dir}/#{$rpmforge_key}"
 end
-remote_file "#{$tmp_dir}/rpmforge-release-0.5.2-2.el6.rf.x86_64.rpm" do
-    source  "http://packages.sw.be/rpmforge-release/rpmforge-release-0.5.2-2.el6.rf.x86_64.rpm"
+$rpmforge_name="rpmforge-release-0.5.2-2.el6.rf.x86_64.rpm"
+remote_file "#{$tmp_dir}/#{$rpmforge_name}" do
+    source  "http://packages.sw.be/rpmforge-release/#{$rpmforge_name}"
     action  :create_if_missing
 end
-rpm_package "#{$tmp_dir}/rpmforge-release-0.5.2-2.el6.rf.x86_64.rpm"
+rpm_package "#{$tmp_dir}/#{$rpmforge_name}"
+
+
+# EPEL (required for erlang)
+$epel_name="epel-release-6-8.noarch.rpm"
+remote_file "#{$tmp_dir}/#{$epel_name}" do
+  source  "http://download.fedoraproject.org/pub/epel/6/i386/#{$epel_name}"
+  action  :create_if_missing
+end
+rpm_package "#{$tmp_dir}/#{$epel_name}"
 
 
 # Misc dependencies
@@ -41,14 +52,18 @@ yum_package "xorg-x11-fonts-Type1.noarch"
 yum_package "groff"
 yum_package "lua"
 yum_package "lua-devel"
+yum_package "erlang"
 
 
 # Mysql
 %w[MySQL-client-5.5.31-2.el6.x86_64.rpm
-   MySQL-devel-5.5.31-2.el6.x86_64.rpm].each do |rpm|
+   MySQL-devel-5.5.31-2.el6.x86_64.rpm
+   MySQL-shared-5.5.31-2.el6.x86_64.rpm
+   MySQL-shared-compat-5.5.31-2.el6.x86_64.rpm
+   MySQL-server-5.5.31-2.el6.x86_64.rpm].each do |rpm|
     remote_file rpm do
         action :create_if_missing
-        source "#{$zen_download}/#{rpm}"
+        source "http://vagrant.zendev.org/deps/#{rpm}"
         path "#{$tmp_dir}/#{rpm}"
     end
     rpm_package rpm do
@@ -60,7 +75,9 @@ end
         to "/usr/lib64/mysql/#{mysqllib}"
     end
 end
-
+service "mysql" do
+    action :start
+end
 
 # RRD
 $rrd_rpms = %w[ rrdtool-1.4.7-1.el6.rfx.x86_64.rpm
@@ -96,6 +113,31 @@ execute "Install JDK" do
 end
 
 
+# RabbitMQ
+$rabbitmq_name = "rabbitmq-server-2.8.6-1.noarch.rpm"
+remote_file "#{$tmp_dir}/#{$rabbitmq_name}" do
+  source  "http://www.rabbitmq.com/releases/rabbitmq-server/v2.8.6//#{$rabbitmq_name}"
+  action  :create_if_missing
+end
+rpm_package $rabbitmq_name do
+  package_name "#{$tmp_dir}/#{$rabbitmq_name}"
+end
+service "rabbitmq-server" do
+  action :start
+end
+execute "rabbitmqctl add_user" do
+    command "rabbitmqctl add_user zenoss zenoss"
+    returns [0,2] # 2 => user already exists
+end
+execute "rabbitmqctl add_vhost" do
+  command "rabbitmqctl add_vhost /zenoss"
+  returns [0,2] # 2 => vhost already exists
+end
+execute "rabbitmqctl set_permissions" do
+  command "rabbitmqctl set_permissions -p /zenoss zenoss '.*' '.*' '.*'"
+end
+
+
 # Maven
 $maven_name="apache-maven-3.0.5-bin.tar.gz"
 remote_file "#{$tmp_dir}/#{$maven_name}" do
@@ -113,13 +155,44 @@ end
 
 
 # Zenoss
+$bashrc_contents = <<EOF
+# .bashrc
+
+# Source global definitions
+if [ -f /etc/bashrc ]; then
+	. /etc/bashrc
+fi
+
+# User specific aliases and functions
+export ZENHOME="/opt/zenoss"
+export INSTANCE_HOME="/opt/zenoss"
+export PATH="${ZENHOME}/bin:${PATH}"
+export PYTHONPATH="/opt/zenoss/lib/python"
+
+if [ "${USE_ZENDS}" = "1" ];then
+  export LD_LIBRARY_PATH="${ZENDSHOME}/lib:${ZENHOME}/lib"
+  export PATH="${ZENDSHOME}/bin:${PATH}"
+else
+  export LD_LIBRARY_PATH="${ZENHOME}/lib"
+fi
+
+export PROTOCOL_BUFFERS_PYTHON_IMPLEMENTATION="cpp"
+EOF
 user "zenoss" do
     action :create
 end
-directory "/opt/zenoss" do
+file "/home/zenoss/.bashrc" do
     owner "zenoss"
     group "zenoss"
-    mode 0755
+    mode 0644
+    content $bashrc_contents
 end
-
+file "/etc/sudoers.d/zenoss" do
+  content "zenoss ALL=(ALL) ALL"
+end
+directory "/opt/zenoss" do
+  owner "zenoss"
+  group "zenoss"
+  mode 0755
+end
 
