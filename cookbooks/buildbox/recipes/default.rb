@@ -76,7 +76,7 @@ end
     end
 end
 service "mysql" do
-    action :start
+    action [:enable, :start]
 end
 
 # RRD
@@ -122,7 +122,7 @@ rpm_package $rabbitmq_name do
   package_name "#{$tmp_dir}/#{$rabbitmq_name}"
 end
 service "rabbitmq-server" do
-  action :start
+  action [:enable, :start]
 end
 execute "rabbitmqctl add_user" do
     command "rabbitmqctl add_user zenoss zenoss"
@@ -194,4 +194,6 @@ directory "/opt/zenoss" do
   group "zenoss"
   mode 0755
 end
-
+service "iptables" do
+    action :disable
+end
