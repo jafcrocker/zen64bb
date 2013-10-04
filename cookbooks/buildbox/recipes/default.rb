@@ -197,3 +197,12 @@ end
 service "iptables" do
     action :disable
 end
+
+# Timezone
+file "/etc/localtime" do
+  not_if {::File.ftype('/etc/localtime')=='link'}
+  action :delete
+end
+link "/etc/localtime" do
+  to "/usr/share/zoneinfo/US/Central"
+end
