@@ -1,4 +1,4 @@
-$zen_download="https://s3.amazonaws.com/wkh-zen-rpms" # Ward K. Harold
+$zen_download="http://vagrant.zendev.org/deps/zen64bb" 
 $tmp_dir="#{Chef::Config[:file_cache_path]}"
 
 
