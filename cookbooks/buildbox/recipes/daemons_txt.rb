@@ -1,3 +1,9 @@
+directory "/opt/zenoss/etc" do
+  owner "zenoss"
+  group "zenoss"
+  mode 0755
+end
+
 file "daemons.txt" do
   path "/opt/zenoss/etc/daemons.txt"
   owner "zenoss"
