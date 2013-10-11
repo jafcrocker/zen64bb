@@ -180,6 +180,10 @@ EOF
 user "zenoss" do
     action :create
 end
+directory "/home/zenoss" do
+    # Readable so zenossimpact user can read ~/work
+    mode 0755
+end
 file "/home/zenoss/.bashrc" do
     owner "zenoss"
     group "zenoss"
@@ -206,3 +210,4 @@ end
 link "/etc/localtime" do
   to "/usr/share/zoneinfo/US/Central"
 end
+
