@@ -30,7 +30,6 @@ rpm_package "#{$tmp_dir}/#{$epel_name}"
 
 # Misc dependencies
 yum_package "vim-enhanced"
-yum_package "git"
 yum_package "subversion"
 yum_package "rpm-build"
 yum_package "bc"
@@ -54,7 +53,11 @@ yum_package "groff"
 yum_package "lua"
 yum_package "lua-devel"
 yum_package "erlang"
-
+execute "yum install git" do
+    # Install a github compatible version of git 
+    command "yum install git -y --disablerepo updates --disablerepo base --enablerepo rpmforge-extras"
+    not_if {::File.exists?("/usr/bin/git")}
+end
 
 # Mysql
 %w[MySQL-client-5.5.31-2.el6.x86_64.rpm
