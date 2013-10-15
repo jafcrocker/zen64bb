@@ -210,7 +210,7 @@ directory "/opt/zenoss" do
   mode 0755
 end
 service "iptables" do
-    action :disable
+    action [:disable, :stop]
 end
 directory "/home/zenoss/.m2" do
     owner "zenoss"
