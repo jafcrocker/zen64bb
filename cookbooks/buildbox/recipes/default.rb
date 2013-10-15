@@ -30,6 +30,7 @@ rpm_package "#{$tmp_dir}/#{$epel_name}"
 
 # Misc dependencies
 yum_package "vim-enhanced"
+yum_package "git"
 yum_package "subversion"
 yum_package "rpm-build"
 yum_package "bc"
@@ -148,13 +149,16 @@ execute "Install Maven" do
     cwd     "/usr/local/share/"
     not_if  { ::File.exists?("/usr/local/share/apache-maven-3.0.5") }
 end
-link "/usr/local/bin/mvn" do
-    to "/usr/local/share/apache-maven-3.0.5/bin/mvn"
+file "/etc/profile.d/maven.sh" do
+    mode 0644
+    content "export M2_HOME=/usr/local/share/apache-maven-3.0.5\n" +
+            "export M2=$M2_HOME/bin\n" +
+            "export PATH=$PATH:$M2\n"
 end
 
 
 # Zenoss
-$bashrc_contents = <<EOF
+$bashrc = <<EOF
 # .bashrc
 
 # Source global definitions
@@ -177,18 +181,25 @@ fi
 
 export PROTOCOL_BUFFERS_PYTHON_IMPLEMENTATION="cpp"
 EOF
+$m2_settings = <<EOF
+<settings>
+    <mirrors>
+        <mirror>
+            <id>europa</id>
+            <mirrorOf>*</mirrorOf>
+            <url>http://nexus.zendev.org:8081/nexus/content/groups/public</url>
+        </mirror>
+    </mirrors>
+</settings>
+EOF
 user "zenoss" do
     action :create
-end
-directory "/home/zenoss" do
-    # Readable so zenossimpact user can read ~/work
-    mode 0755
 end
 file "/home/zenoss/.bashrc" do
     owner "zenoss"
     group "zenoss"
     mode 0644
-    content $bashrc_contents
+    content $bashrc
 end
 file "/etc/sudoers.d/zenoss" do
   content "zenoss ALL=(ALL) ALL"
@@ -200,6 +211,15 @@ directory "/opt/zenoss" do
 end
 service "iptables" do
     action :disable
+end
+directory "/home/zenoss/.m2" do
+    owner "zenoss"
+    group "zenoss"
+end
+file "/home/zenoss/.m2/settings.xml" do
+    content $m2_settings
+    owner "zenoss"
+    group "zenoss"
 end
 
 # Timezone

@@ -7,8 +7,7 @@ host and changes will be reflected on running code on the guest.
 Bring up the VM
 ---------------
 
-    $ mkdir zenoss
-    $ mkdir impact
+    $ mkdir src
     $ vagrant up
 
 Build on the guest:
@@ -26,11 +25,9 @@ Checkout on the host:
 The Vagrantfile will mount ./zenoss as /home/zenoss/work and ./impact as 
 /home/zenossimpact/work
 
-    $ cd ./zenoss
+    $ cd ./src
     $ svn checkout http://dev.zenoss.com/svnint/branches/core/zenoss-4.x/ core
     $ git clone https://github.com/zenoss/ZenPacks.zenoss.Impact.git
-
-    $ cd ./impact
     $ git clone https://github.com/zenoss/impact-server.git
 
 Link to the built files:
@@ -39,6 +36,4 @@ Link to the built files:
     $ vagrant ssh
     $ sudo su - zenoss
     $ ln -s /home/zenoss/work/core/Products /opt/zenoss/Products
-
-    $ sudo su - zenossimpact
-    $ ln -s /home/zenossimpact/work/impact-server/target/zenoss-dsa-4.2.5.70.0-SNAPSHOT /opt/zenoss_impact/webapps/zenoss-dsa.war
+    $ ln -s /home/zenoss/work/impact-server/target/zenoss-dsa-4.2.5.70.0-SNAPSHOT /opt/zenoss_impact/webapps/zenoss-dsa.war
