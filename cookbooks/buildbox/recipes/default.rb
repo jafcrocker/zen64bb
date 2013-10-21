@@ -52,6 +52,7 @@ yum_package "xorg-x11-fonts-Type1.noarch"
 yum_package "groff"
 yum_package "lua"
 yum_package "lua-devel"
+yum_package "redis"
 yum_package "erlang"
 execute "yum install git" do
     # Install a github compatible version of git 
