@@ -1,0 +1,6 @@
+# This file ensures that a (more or less) empty src directory exists.
+
+# Ignore all files in this directory
+*
+# Except for this file
+!.gitignore
