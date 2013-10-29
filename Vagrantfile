@@ -20,8 +20,11 @@ Vagrant.configure("2") do |config|
   config.vm.provision :chef_solo do |chef|
     chef.cookbooks_path = "cookbooks"
 
-    # All prereqs for building Zenoss Core
+    # All prereqs for building/runnning Zenoss Core
     chef.add_recipe "buildbox"
+
+    # Add zenoss-user specific configuration
+    chef.add_recipe "buildbox::zenoss"
 
     # Add hooks for Impact development
     chef.add_recipe "buildbox::impact"
