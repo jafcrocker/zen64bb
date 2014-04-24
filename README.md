@@ -4,6 +4,23 @@ the guest, check out source code on the host, mount the host's source on the
 guest, and link to the mounted source.  Then code can be edited on the
 host and changes will be reflected on running code on the guest.  
 
+Set up Virtualbox DHCP
+----------------------
+Go into Virtualbox Preferences|Network|Host Only Networks.  Create a new network (or edit existing) with the following settings:
+
+**Adapter:**
+```
+IPv4 Address: 192.168.0.1
+IPv4 Mask: 255.255.255.0
+```
+**DHCP Server:**
+```
+Server Address: 192.168.0.2
+Server Mask: 255.255.255.0
+Lower Address Bound: 192.168.0.3
+Upper Address Bound: 192.168.0.254
+```
+
 Bring up the VM
 ---------------
 
