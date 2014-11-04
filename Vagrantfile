@@ -2,11 +2,12 @@
 # vi: set ft=ruby :
 
 $cwd =  File.expand_path(File.dirname(__FILE__))
+$hostname = ($cwd.split('/')[-1] + "-vm").gsub(/[^a-zA-Z0-9]/, "-")
 
 Vagrant.configure("2") do |config|
   config.vm.box = "cent64-zenoss_users"
   config.vm.box_url = "http://vagrant.zendev.org/boxes/centos-6.4-x64-zenoss_users.box"
-  config.vm.hostname =  $cwd.split('/')[-1] + "-vm"
+  config.vm.hostname = $hostname
   config.vm.synced_folder "./src", "/home/zenoss/work", owner: "zenoss", group: "zenoss"
   config.vm.network :private_network, type: :dhcp,  ip: "192.168.0.0", netmask: "255.255.255.0" 
   config.vm.network "forwarded_port", guest: 8080, host: 6990, auto_correct: true
