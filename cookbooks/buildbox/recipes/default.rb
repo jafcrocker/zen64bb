@@ -1,6 +1,12 @@
 $zen_download="http://vagrant.zendev.org/deps/zen64bb" 
 $tmp_dir="#{Chef::Config[:file_cache_path]}"
 
+$zenossdeps_name="zenossdeps-4.2.x-1.el6.noarch.rpm"
+remote_file "#{$tmp_dir}/#{$zenossdeps_name}" do
+    source  "http://artifacts.zenoss.loc/zenossdeps-repo/#{$zenossdeps_name}"
+    action  :create_if_missing
+end
+rpm_package "#{$tmp_dir}/#{$zenossdeps_name}"
 
 # RPMForge
 $rpmforge_key="RPM-GPG-KEY.dag.txt"
@@ -17,15 +23,6 @@ remote_file "#{$tmp_dir}/#{$rpmforge_name}" do
     action  :create_if_missing
 end
 rpm_package "#{$tmp_dir}/#{$rpmforge_name}"
-
-
-# EPEL (required for erlang)
-$epel_name="epel-release-6-8.noarch.rpm"
-remote_file "#{$tmp_dir}/#{$epel_name}" do
-  source  "http://download.fedoraproject.org/pub/epel/6/i386/#{$epel_name}"
-  action  :create_if_missing
-end
-rpm_package "#{$tmp_dir}/#{$epel_name}"
 
 
 # Misc dependencies
@@ -54,6 +51,7 @@ yum_package "lua"
 yum_package "lua-devel"
 yum_package "redis"
 yum_package "erlang"
+
 execute "yum install git" do
     # Install a github compatible version of git 
     command "yum install git -y --disablerepo updates --disablerepo base --enablerepo rpmforge-extras"
